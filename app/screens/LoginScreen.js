@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, Button } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KEY_USER_TOKEN, BACKEND_URL } from "../constants";
 
-export default function LoginScreen({navigation}) {
+export default function LoginScreen({ navigation, route }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [invalidCred, setInvalidCred] = useState(false);
@@ -52,6 +52,9 @@ export default function LoginScreen({navigation}) {
         {invalidCred && (
           <Text style={styles.invalidCred}>Invalid Credentials.</Text>
         )}
+        {/* {route.params && (
+          <Text style={styles.invalidCred}>{route.params.error}</Text>
+        )} */}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -66,9 +69,11 @@ export default function LoginScreen({navigation}) {
           onChangeText={setPassword}
           secureTextEntry={true}
         />
-        <Button title={loading? "loading..." : "Submit"}
-        color={loading? "#aa4465":"#0b3954"}
-         onPress={() => login()} />
+        <Button
+          title={loading ? "loading..." : "Submit"}
+          color={loading ? "#aa4465" : "#0b3954"}
+          onPress={() => login()}
+        />
       </View>
     </View>
   );
