@@ -6,8 +6,20 @@ import {
   Button,
   Image,
 } from "react-native";
+import Loading from "../components/Loading";
+import useToken from "../hooks/useToken";
+import useUser from "../hooks/useUser";
 
 export default function WelcomeScreen({ navigation }) {
+  const token = useToken();
+  const { student, load } = useUser(token);
+  if (load) {
+    return <Loading />;
+  }
+  if (student) {
+    navigation.navigate("home", {screen: "list"});
+  }
+
   return (
     <ImageBackground
       style={styles.backgound}

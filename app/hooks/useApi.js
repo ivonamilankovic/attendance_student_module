@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { BACKEND_URL } from "../constants";
-import useToken from "./useToken";
 
-const useApi = (method, apiSection, urlParam = "", body = {}) => {
+const useApi = (token, method, apiSection, urlParam = "", body = {}) => {
   const [data, setData] = useState();
   const [load, setLoad] = useState(true);
 
   const getData = useCallback(async () => {
-   const token = useToken();
-
     let fetchParams = {
       method: method,
       headers: {

@@ -12,7 +12,7 @@ export default function LoginScreen({ navigation, route }) {
   const saveToken = async (token) => {
     try {
       await AsyncStorage.setItem(KEY_USER_TOKEN, token);
-      navigation.navigate("home");
+      navigation.navigate("home", { screen: "list" });
     } catch (e) {
       console.log(e);
     }

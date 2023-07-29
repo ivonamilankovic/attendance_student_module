@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Image } from "react-native";
+import { Image, RootTagContext } from "react-native";
 import AttendanceListScreen from "../screens/AttendanceListScreen";
 import ScanQrCodeScreen from "../screens/ScanQrCodeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -9,6 +9,7 @@ const Tab = createBottomTabNavigator();
 export default function Tabs() {
   return (
     <Tab.Navigator
+      initialRouteName="list"
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -29,7 +30,7 @@ export default function Tabs() {
       }}
     >
       <Tab.Screen
-        name="home"
+        name="list"
         component={AttendanceListScreen}
         options={{
           tabBarIcon: ({ focused }) => {
@@ -40,6 +41,7 @@ export default function Tabs() {
                   width: focused ? 30 : 25,
                   height: focused ? 30 : 25,
                   tintColor: focused ? "#0b3954" : "#bfd7ea",
+                  transform: [{ rotate: "90deg" }],
                 }}
               />
             );

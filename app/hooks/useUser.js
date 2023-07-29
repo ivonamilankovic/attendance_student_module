@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BACKEND_URL } from "../constants";
 
 export const useUser = (token) => {
-  const [currentUser, setUser] = useState();
+  const [student, setUser] = useState();
   const [load, setLoad] = useState(true);
   const [success, setSuccess] = useState();
 
@@ -32,7 +32,7 @@ export const useUser = (token) => {
     getUser();
   }, [token, getUser]);
 
-  return { currentUser, load, success };
+  return { student, load, success };
 };
 
 export default useUser;
