@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, Button } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KEY_USER_TOKEN, BACKEND_URL } from "../constants";
 
-export default function LoginScreen({ navigation, route }) {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [invalidCred, setInvalidCred] = useState(false);
@@ -12,7 +12,7 @@ export default function LoginScreen({ navigation, route }) {
   const saveToken = async (token) => {
     try {
       await AsyncStorage.setItem(KEY_USER_TOKEN, token);
-      navigation.navigate("home", { screen: "list" });
+      navigation.navigate("home", { screen: "scan" });
     } catch (e) {
       console.log(e);
     }
@@ -52,9 +52,6 @@ export default function LoginScreen({ navigation, route }) {
         {invalidCred && (
           <Text style={styles.invalidCred}>Invalid Credentials.</Text>
         )}
-        {/* {route.params && (
-          <Text style={styles.invalidCred}>{route.params.error}</Text>
-        )} */}
         <TextInput
           style={styles.input}
           placeholder="Email"

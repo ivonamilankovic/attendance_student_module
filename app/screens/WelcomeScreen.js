@@ -6,18 +6,24 @@ import {
   Button,
   Image,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from "../components/Loading";
+import { KEY_USER_TOKEN } from "../constants";
 import useToken from "../hooks/useToken";
 import useUser from "../hooks/useUser";
 
 export default function WelcomeScreen({ navigation }) {
   const token = useToken();
   const { student, load } = useUser(token);
+
   if (load) {
     return <Loading />;
   }
+
   if (student) {
-    navigation.navigate("home", {screen: "list"});
+    if (!student.errors) {
+      navigation.navigate("home", { screen: "scan" });
+    }
   }
 
   return (
