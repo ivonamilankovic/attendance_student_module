@@ -28,11 +28,22 @@ export default function ProfileScreen() {
         <ScrollView style={styles.container}>
           <Text style={styles.title}>My data</Text>
           <UserData userData={userData} />
-          <Button color="#0b3954" title="I want to change my password" onPress={()=>{setShowForm(true)}}/>
+          <Button
+            color="#0b3954"
+            title="I want to change my password"
+            onPress={() => {
+              setShowForm(true);
+            }}
+          />
         </ScrollView>
       );
     } else {
-      return <ChangePasswordForm setShowForm={setShowForm} />;
+      return (
+        <ChangePasswordForm
+          setShowForm={setShowForm}
+          userID={userData.userId}
+        />
+      );
     }
   }
 }

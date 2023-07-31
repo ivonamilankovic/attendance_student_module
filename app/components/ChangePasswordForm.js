@@ -8,14 +8,43 @@ import {
   StyleSheet,
   Pressable,
 } from "react-native";
+import { BACKEND_URL } from "../constants";
+import useToken from "../hooks/useToken";
 
-export default function ChangePasswordForm({ setShowForm }) {
+export default function ChangePasswordForm({ setShowForm, userID }) {
+  const token = useToken();
   const [pass1, setPass1] = useState("");
   const [pass2, setPass2] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [invalid, setInvalid] = useState("");
 
   function updatePassword() {
-    //TODO update pswd
+    setLoading(true);
+    if (pass1 !== pass2) {
+      setInvalid("Passwords do not match.");
+      setSuccess(false);
+    } else {
+      if (userID !== 0 && token) {
+        fetch(BACKEND_URL + "User/ChangePassword/" + userID, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ password: pass1 }),
+        })
+          .then((r) => {
+            setSuccess(true);
+            setInvalid("");
+          })
+          .catch((e) => {
+            console.log(e);
+            setInvalid("Some error occured. Please try again.");
+          });
+      }
+    }
+    setLoading(false);
   }
 
   return (
@@ -25,6 +54,12 @@ export default function ChangePasswordForm({ setShowForm }) {
       </Pressable>
       <View style={styles.form}>
         <Text style={styles.title}>Change password</Text>
+        {success && (
+          <Text style={styles.successMsg}>
+            Your password have been changed.
+          </Text>
+        )}
+        {invalid && <Text style={styles.invalid}>{invalid}</Text>}
         <TextInput
           placeholder="New password..."
           value={pass1}
@@ -83,5 +118,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     justifyContent: "center",
     flex: 1,
+  },
+  successMsg: {
+    color: "#7fb501",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  invalid: {
+    color: "#f00",
+    textAlign: "center",
+    marginBottom: 10,
   },
 });
