@@ -19,7 +19,8 @@
       "infoPlist":{
         "NSAppTransportSecurity":{
           "NSAllowsArbitraryLoads": true
-        }
+        }, 
+        "NSCameraUsageDescription": true
       }
     },
     "android": {
@@ -27,7 +28,7 @@
         "foregroundImage": "./app/assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "CAMERA"]
     },
     "web": {
       "favicon": "./app/assets/favicon.png"
