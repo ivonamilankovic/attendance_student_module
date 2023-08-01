@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Text, StyleSheet, ScrollView, Button } from "react-native";
+import { Text, StyleSheet, ScrollView, Button, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import Loading from "../components/Loading";
 import UserData from "../components/UserData";
 import useToken from "../hooks/useToken";
 import useUser from "../hooks/useUser";
+import { KEY_USER_TOKEN } from "../constants";
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const [userData, setUser] = useState();
   const [showForm, setShowForm] = useState(false);
   const token = useToken();
@@ -17,6 +19,15 @@ export default function ProfileScreen() {
       setUser(student);
     }
   }, [student]);
+
+  async function logout() {
+    try {
+      await AsyncStorage.setItem(KEY_USER_TOKEN, "");
+      navigation.navigate("login");
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   if (load) {
     return <Loading />;
@@ -35,6 +46,9 @@ export default function ProfileScreen() {
               setShowForm(true);
             }}
           />
+          <View style={styles.logoutContainer}>
+            <Button title="Logout" color="#f00" onPress={() => logout()} />
+          </View>
         </ScrollView>
       );
     } else {
@@ -60,5 +74,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textAlign: "center",
     color: "#0b3954",
+  },
+  logoutContainer: {
+    marginTop: 55,
+    width: "60%",
+    alignSelf: "center",
   },
 });
