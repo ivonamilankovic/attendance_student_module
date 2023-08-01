@@ -1,11 +1,44 @@
 import { useState, useEffect } from "react";
-import { View, Text, SectionList, StyleSheet } from "react-native";
-import useApi from "../hooks/useApi";
+import {
+  View,
+  Text,
+  SectionList,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
+import { BACKEND_URL } from "../constants";
 import Loading from "./Loading";
 
 export default function AttendanceList({ index, token }) {
+  const [refresing, setRefreshing] = useState(false);
   const [attendances, setAttendances] = useState([]);
-  const { data, load } = useApi(token, "GET", "StudentAttendance");
+  const [load, setLoad] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  function fetchData() {
+    setRefreshing(true);
+    fetch(BACKEND_URL + "StudentAttendance", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        setAttendances(d);
+        setLoad(false);
+        setRefreshing(false);
+      })
+      .catch((e) => {
+        console.log(e);
+        setLoad(false);
+        setRefreshing(false);
+      });
+  }
 
   function transformData(data) {
     const groupedLectures = data.reduce((acc, curr) => {
@@ -42,12 +75,6 @@ export default function AttendanceList({ index, token }) {
     return result;
   }
 
-  useEffect(() => {
-    if (data) {
-      setAttendances(data);
-    }
-  }, [data]);
-
   if (load) {
     return <Loading />;
   }
@@ -66,6 +93,9 @@ export default function AttendanceList({ index, token }) {
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refresing} onRefresh={fetchData} />
+        }
       />
     );
   } else {
