@@ -1,39 +1,54 @@
 import { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Vibration, Button, Image } from "react-native";
+import { Text, View, StyleSheet, Vibration, Image } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import * as Location from "expo-location";
 import Loading from "../components/Loading";
 import useToken from "../hooks/useToken";
 import useUser from "../hooks/useUser";
 import { BACKEND_URL } from "../constants";
 import AboutLecture from "../components/AboutLecture";
 
-export default function ScanQrCodeScreen({ navigation }) {
+export default function ScanQrCodeScreen() {
   const token = useToken();
   const { student, load } = useUser(token);
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasPermissionCamera, setHasPermissionCamera] = useState(null);
+  const [hasPermissionLocation, setHasPermissionLocation] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [invalid, setInvalid] = useState(false);
   const [msg, setMsg] = useState("");
+  const [response, setResponse] = useState(null);
   const [lecture, setLecture] = useState();
   const [openAbout, setOpenAbout] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
+      setHasPermissionCamera(status === "granted");
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        await Location.requestBackgroundPermissionsAsync();
+      }
+      setHasPermissionLocation(status === "granted");
+    })();
+  }, []);
+
+  const handleBarCodeScanned = async ({ type, data }) => {
+    setResponse(null);
     setScanned(true);
     const lectureId = data;
-    //TODO check location
+    let location = await Location.getCurrentPositionAsync();
     const body = {
       lectureId: lectureId,
       index: student.index,
-      latitude: 0,
-      longitude: 0,
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
     };
+
     fetch(BACKEND_URL + "StudentAttendance", {
       method: "POST",
       headers: {
@@ -46,15 +61,21 @@ export default function ScanQrCodeScreen({ navigation }) {
       .then((r) => {
         setScanned(false);
         setInvalid(false);
-        if (r.lecture.name) {
+        if (r.lecture !== undefined) {
           setLecture(r.lecture);
-          setMsg("You have been registered to new lecture.");
+          setMsg("You have been registered to new lecture");
+          setOpenAbout(true);
+        } else {
+          console.log(r);
+          setResponse(r);
+          setInvalid(true);
         }
         Vibration.vibrate();
       })
       .catch((e) => {
         console.log(e);
         setInvalid(true);
+        setScanned(false);
       });
   };
 
@@ -62,11 +83,11 @@ export default function ScanQrCodeScreen({ navigation }) {
     return <Loading />;
   }
 
-  if (hasPermission === null) {
+  if (hasPermissionCamera === null || hasPermissionLocation === null) {
     return <Loading />;
   }
 
-  if (hasPermission === false) {
+  if (hasPermissionCamera === false) {
     return (
       <View style={styles.container}>
         <Text style={styles.text}>Camera permission not granted.</Text>
@@ -74,11 +95,21 @@ export default function ScanQrCodeScreen({ navigation }) {
     );
   }
 
-  if (openAbout) {
-    return <AboutLecture lecture={lecture} setOpenAbout={setOpenAbout} />;
+  if (hasPermissionLocation === false) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Location permission not granted.</Text>
+      </View>
+    );
   }
 
-  if (student && token && hasPermission) {
+  if (openAbout) {
+    return (
+      <AboutLecture lecture={lecture} setOpenAbout={setOpenAbout} msg={msg} />
+    );
+  }
+
+  if (student && token && hasPermissionCamera && hasPermissionLocation) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Scan QR code</Text>
@@ -91,24 +122,12 @@ export default function ScanQrCodeScreen({ navigation }) {
             style={styles.camera}
           />
         </View>
-        {msg && (
-          <View style={styles.msgContainer}>
-            <Image
-              source={require("../assets/success.png")}
-              style={styles.img}
-            />
-            <Text style={styles.msgText}>{msg}</Text>
-            <Button
-              title="Read about lecture..."
-              color="#7fb501"
-              onPress={() => setOpenAbout(true)}
-            />
-          </View>
-        )}
         {invalid && (
           <View style={styles.msgContainer}>
             <Image source={require("../assets/error.png")} style={styles.img} />
-            <Text style={styles.invalid}>Not valid code.</Text>
+            <Text style={styles.invalid}>
+              {response ? response : "Not valid code."}
+            </Text>
           </View>
         )}
       </View>
@@ -154,11 +173,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     fontWeight: "600",
-  },
-  msgText: {
-    textAlign: "center",
-    color: "#7fb501",
-    marginVertical: 10,
   },
   invalid: {
     color: "#f00",

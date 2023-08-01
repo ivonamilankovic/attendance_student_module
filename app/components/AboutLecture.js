@@ -1,13 +1,28 @@
-import { View, Pressable, Image, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Pressable,
+  Image,
+  Text,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 
-export default function AboutLecture({ lecture, setOpenAbout }) {
+export default function AboutLecture({ lecture, setOpenAbout, msg }) {
   if (lecture) {
     return (
       <View style={styles.container}>
         <Pressable onPress={() => setOpenAbout(false)} style={styles.backBtn}>
           <Image source={require("../assets/back.png")} style={styles.back} />
         </Pressable>
-        <View style={styles.form}>
+        <View style={styles.msgContainer}>
+          <Image source={require("../assets/success.png")} style={styles.img} />
+          <Text style={styles.msgText}>{msg}:</Text>
+        </View>
+        <ScrollView
+          style={styles.form}
+          contentContainerStyle={{ justifyContent: "center" }}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.title}>{lecture.name}</Text>
           <Text style={styles.date}>
             {new Date(lecture.date).toDateString()}
@@ -18,7 +33,7 @@ export default function AboutLecture({ lecture, setOpenAbout }) {
           </Text>
           <Text style={styles.titleAbout}>About lecture:</Text>
           <Text style={styles.text}>{lecture.description}</Text>
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -42,7 +57,6 @@ const styles = StyleSheet.create({
   form: {
     paddingHorizontal: 40,
     marginTop: 50,
-    justifyContent: "center",
   },
   title: {
     fontSize: 24,
@@ -72,5 +86,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     fontStyle: "italic",
     textAlign: "center",
+  },
+  msgText: {
+    textAlign: "center",
+    color: "#7fb501",
+    marginVertical: 10,
+  },
+  img: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+  },
+  msgContainer: {
+    marginTop: 30,
+    marginHorizontal: 55,
   },
 });
