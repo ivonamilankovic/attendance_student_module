@@ -15,7 +15,6 @@ export default function AttendanceListScreen() {
     const i = student.index;
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Attended lectures:</Text>
         <AttendanceList index={i} token={token} />
       </View>
     );
@@ -28,11 +27,5 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 0,
     paddingHorizontal: 20,
-  },
-  title: {
-    marginVertical: 10,
-    fontSize: 22,
-    fontWeight: "700",
-    textAlign: "center",
   },
 });

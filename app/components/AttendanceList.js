@@ -5,14 +5,18 @@ import {
   SectionList,
   StyleSheet,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { BACKEND_URL } from "../constants";
 import Loading from "./Loading";
+import CourseStatistic from "./CourseStatistic";
 
 export default function AttendanceList({ index, token }) {
   const [refresing, setRefreshing] = useState(false);
   const [attendances, setAttendances] = useState([]);
   const [load, setLoad] = useState(true);
+  const [showStatistic, setShowStatistic] = useState(false);
+  const [courseToShow, setCourseToShow] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -75,6 +79,11 @@ export default function AttendanceList({ index, token }) {
     return result;
   }
 
+  function show(title) {
+    setShowStatistic(true);
+    setCourseToShow(title);
+  }
+
   if (load) {
     return <Loading />;
   }
@@ -86,27 +95,48 @@ export default function AttendanceList({ index, token }) {
       }
     });
     const data = transformData(myAtt);
-    return (
-      <SectionList
-        sections={data}
-        keyExtractor={(item, index) => index.toString()}
-        renderSectionHeader={renderSectionHeader}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refresing} onRefresh={fetchData} />
-        }
-      />
-    );
+    if (!showStatistic) {
+      return (
+        <>
+          <Text style={styles.titleMain}>Attended lectures:</Text>
+          <SectionList
+            sections={data}
+            keyExtractor={(item, index) => index.toString()}
+            renderSectionHeader={({ section: { title } }) => (
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => show(title)}
+              >
+                <Text style={styles.sectionHeaderText}>{title}</Text>
+              </Pressable>
+            )}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refresing} onRefresh={fetchData} />
+            }
+          />
+        </>
+      );
+    } else {
+      return (
+        <CourseStatistic
+          courseToShow={courseToShow}
+          index={index}
+          token={token}
+          setShowStatistic={setShowStatistic}
+        />
+      );
+    }
   } else {
     return <Text style={styles.noData}>No attendances.</Text>;
   }
 }
 
 const renderSectionHeader = ({ section: { title } }) => (
-  <View style={styles.sectionHeader}>
+  <Pressable style={styles.sectionHeader} onPress={() => show(title)}>
     <Text style={styles.sectionHeaderText}>{title}</Text>
-  </View>
+  </Pressable>
 );
 
 const renderItem = ({ item }) => (
@@ -152,6 +182,12 @@ const styles = StyleSheet.create({
   },
   noData: {
     color: "#f00",
+    textAlign: "center",
+  },
+  titleMain: {
+    marginVertical: 10,
+    fontSize: 22,
+    fontWeight: "700",
     textAlign: "center",
   },
 });
